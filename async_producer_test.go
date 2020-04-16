@@ -1159,6 +1159,7 @@ func TestAsyncProducerIdempotentEpochRollover(t *testing.T) {
 	config.Producer.Idempotent = true
 	config.Net.MaxOpenRequests = 1
 	config.Version = V0_11_0_0
+	config.FeatureToggleIdempotentProducerFix = true
 
 	producer, err := NewAsyncProducer([]string{broker.Addr()}, config)
 	if err != nil {

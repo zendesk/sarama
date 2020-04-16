@@ -409,6 +409,13 @@ func (tp *topicProducer) dispatch() {
 			}
 		}
 
+		if !tp.parent.conf.FeatureToggleIdempotentProducerFix {
+			if tp.parent.conf.Producer.Idempotent && msg.retries == 0 {
+				msg.sequenceNumber, msg.producerEpoch = tp.parent.txnmgr.getAndIncrementSequenceNumber(msg.Topic, msg.Partition)
+				msg.hasSequence = true
+			}
+		}
+
 		handler := tp.handlers[msg.Partition]
 		if handler == nil {
 			handler = tp.parent.newPartitionProducer(msg.Topic, msg.Partition)
@@ -590,9 +597,11 @@ func (pp *partitionProducer) dispatch() {
 		// number for it.
 		// All messages being retried (sent or not) have already had their retry count updated
 		// Also, ignore "special" syn/fin messages used to sync the brokerProducer and the topicProducer.
-		if pp.parent.conf.Producer.Idempotent && msg.retries == 0 && msg.flags == 0 {
-			msg.sequenceNumber, msg.producerEpoch = pp.parent.txnmgr.getAndIncrementSequenceNumber(msg.Topic, msg.Partition)
-			msg.hasSequence = true
+		if pp.parent.conf.FeatureToggleIdempotentProducerFix {
+			if pp.parent.conf.Producer.Idempotent && msg.retries == 0 && msg.flags == 0 {
+				msg.sequenceNumber, msg.producerEpoch = pp.parent.txnmgr.getAndIncrementSequenceNumber(msg.Topic, msg.Partition)
+				msg.hasSequence = true
+			}
 		}
 
 		pp.brokerProducer.input <- msg
@@ -780,12 +789,14 @@ func (bp *brokerProducer) run() {
 				}
 			}
 
-			if bp.parent.txnmgr.producerID != noProducerID && bp.buffer.producerEpoch != msg.producerEpoch {
-				// The epoch was reset, need to roll the buffer over
-				Logger.Printf("producer/broker/%d detected epoch rollover, waiting for new buffer\n", bp.broker.ID())
-				if err := bp.waitForSpace(msg, true); err != nil {
-					bp.parent.retryMessage(msg, err)
-					continue
+			if bp.parent.conf.FeatureToggleIdempotentProducerFix {
+				if bp.parent.txnmgr.producerID != noProducerID && bp.buffer.producerEpoch != msg.producerEpoch {
+					// The epoch was reset, need to roll the buffer over
+					Logger.Printf("producer/broker/%d detected epoch rollover, waiting for new buffer\n", bp.broker.ID())
+					if err := bp.waitForSpace(msg, true); err != nil {
+						bp.parent.retryMessage(msg, err)
+						continue
+					}
 				}
 			}
 			if err := bp.buffer.add(msg); err != nil {
@@ -1064,9 +1075,11 @@ func (p *asyncProducer) shutdown() {
 func (p *asyncProducer) returnError(msg *ProducerMessage, err error) {
 	// We need to reset the producer ID epoch if we set a sequence number on it, because the broker
 	// will never see a message with this number, so we can never continue the sequence.
-	if msg.hasSequence {
-		Logger.Printf("producer/txnmanager rolling over epoch due to publish failure on %s/%d", msg.Topic, msg.Partition)
-		p.txnmgr.bumpEpoch()
+	if p.conf.FeatureToggleIdempotentProducerFix {
+		if msg.hasSequence {
+			Logger.Printf("producer/txnmanager rolling over epoch due to publish failure on %s/%d", msg.Topic, msg.Partition)
+			p.txnmgr.bumpEpoch()
+		}
 	}
 	msg.clear()
 	pErr := &ProducerError{Msg: msg, Err: err}

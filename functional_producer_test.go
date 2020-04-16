@@ -112,6 +112,7 @@ func TestFuncProducingIdempotentWithBrokerFailure(t *testing.T) {
 	config.Producer.RequiredAcks = WaitForAll
 	config.Net.MaxOpenRequests = 1
 	config.Version = V0_11_0_0
+	config.FeatureToggleIdempotentProducerFix = true
 
 	producer, err := NewSyncProducer(kafkaBrokers, config)
 	if err != nil {
