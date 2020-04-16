@@ -1,0 +1,183 @@
+version: '3.7'
+services:
+  zookeeper-1:
+    image: 'zookeeper:3.6.0'
+    restart: always
+    depends_on: ['toxiproxy']
+    environment:
+      ZOO_MY_ID: '1'
+      ZOO_SERVERS: 'server.1=zookeeper-1:2888:3888;2181 server.2=zookeeper-2:2888:3888;2181 server.3=zookeeper-3:2888:3888;2181 server.4=zookeeper-4:2888:3888;2181 server.5=zookeeper-5:2888:3888;2181'
+      ZOO_INIT_LIMIT: '10'
+      ZOO_SYNC_LIMIT: '5'
+      ZOO_MAX_CLIENT_CONNS: '0'
+  zookeeper-2:
+    image: 'zookeeper:3.6.0'
+    restart: always
+    depends_on: ['toxiproxy']
+    environment:
+      ZOO_MY_ID: '2'
+      ZOO_SERVERS: 'server.1=zookeeper-1:2888:3888;2181 server.2=zookeeper-2:2888:3888;2181 server.3=zookeeper-3:2888:3888;2181 server.4=zookeeper-4:2888:3888;2181 server.5=zookeeper-5:2888:3888;2181'
+      ZOO_INIT_LIMIT: '10'
+      ZOO_SYNC_LIMIT: '5'
+      ZOO_MAX_CLIENT_CONNS: '0'
+  zookeeper-3:
+    image: 'zookeeper:3.6.0'
+    restart: always
+    depends_on: ['toxiproxy']
+    environment:
+      ZOO_MY_ID: '3'
+      ZOO_SERVERS: 'server.1=zookeeper-1:2888:3888;2181 server.2=zookeeper-2:2888:3888;2181 server.3=zookeeper-3:2888:3888;2181 server.4=zookeeper-4:2888:3888;2181 server.5=zookeeper-5:2888:3888;2181'
+      ZOO_INIT_LIMIT: '10'
+      ZOO_SYNC_LIMIT: '5'
+      ZOO_MAX_CLIENT_CONNS: '0'
+  zookeeper-4:
+    image: 'zookeeper:3.6.0'
+    restart: always
+    depends_on: ['toxiproxy']
+    environment:
+      ZOO_MY_ID: '4'
+      ZOO_SERVERS: 'server.1=zookeeper-1:2888:3888;2181 server.2=zookeeper-2:2888:3888;2181 server.3=zookeeper-3:2888:3888;2181 server.4=zookeeper-4:2888:3888;2181 server.5=zookeeper-5:2888:3888;2181'
+      ZOO_INIT_LIMIT: '10'
+      ZOO_SYNC_LIMIT: '5'
+      ZOO_MAX_CLIENT_CONNS: '0'
+  zookeeper-5:
+    image: 'zookeeper:3.6.0'
+    restart: always
+    depends_on: ['toxiproxy']
+    environment:
+      ZOO_MY_ID: '5'
+      ZOO_SERVERS: 'server.1=zookeeper-1:2888:3888;2181 server.2=zookeeper-2:2888:3888;2181 server.3=zookeeper-3:2888:3888;2181 server.4=zookeeper-4:2888:3888;2181 server.5=zookeeper-5:2888:3888;2181'
+      ZOO_INIT_LIMIT: '10'
+      ZOO_SYNC_LIMIT: '5'
+      ZOO_MAX_CLIENT_CONNS: '0'
+  kafka-1:
+    image: 'bitnami/kafka:2.4.1'
+    restart: always
+    depends_on: ['toxiproxy', 'zookeeper-1', 'zookeeper-2', 'zookeeper-3', 'zookeeper-4', 'zookeeper-5']
+    network_mode: 'service:toxiproxy'
+    environment:
+      KAFKA_CFG_ZOOKEEPER_CONNECT: 'toxiproxy:21801'
+      ALLOW_PLAINTEXT_LISTENER: 'yes'
+      KAFKA_CFG_DEFAULT_REPLICATION_FACTOR: '2'
+      KAFKA_CFG_BROKER_ID: '29091'
+      KAFKA_CFG_BROKER_RACK: '1'
+      KAFKA_CFG_LISTENERS: 'PLAINTEXT://:9091'
+      KAFKA_CFG_ADVERTISED_LISTENERS: 'PLAINTEXT://localhost:29091'
+      KAFKA_CFG_ZOOKEEPER_SESSION_TIMEOUT_MS: '3000'
+      KAFKA_CFG_ZOOKEEPER_CONNECTION_TIMEOUT_MS: '3000'
+      KAFKA_CFG_RESERVED_BROKER_MAX_ID: '100000'
+      KAFKA_CFG_REPLICA_SELECTOR_CLASS: 'org.apache.kafka.common.replica.RackAwareReplicaSelector'
+      KAFKA_CFG_DELETE_TOPIC_ENABLE: 'true'
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: 'false'
+  kafka-2:
+    image: 'bitnami/kafka:2.4.1'
+    restart: always
+    depends_on: ['toxiproxy', 'zookeeper-1', 'zookeeper-2', 'zookeeper-3', 'zookeeper-4', 'zookeeper-5']
+    network_mode: 'service:toxiproxy'
+    environment:
+      KAFKA_CFG_ZOOKEEPER_CONNECT: 'toxiproxy:21802'
+      ALLOW_PLAINTEXT_LISTENER: 'yes'
+      KAFKA_CFG_DEFAULT_REPLICATION_FACTOR: '2'
+      KAFKA_CFG_BROKER_ID: '29092'
+      KAFKA_CFG_BROKER_RACK: '2'
+      KAFKA_CFG_LISTENERS: 'PLAINTEXT://:9092'
+      KAFKA_CFG_ADVERTISED_LISTENERS: 'PLAINTEXT://localhost:29092'
+      KAFKA_CFG_ZOOKEEPER_SESSION_TIMEOUT_MS: '3000'
+      KAFKA_CFG_ZOOKEEPER_CONNECTION_TIMEOUT_MS: '3000'
+      KAFKA_CFG_RESERVED_BROKER_MAX_ID: '100000'
+      KAFKA_CFG_REPLICA_SELECTOR_CLASS: 'org.apache.kafka.common.replica.RackAwareReplicaSelector'
+      KAFKA_CFG_DELETE_TOPIC_ENABLE: 'true'
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: 'false'
+  kafka-3:
+    image: 'bitnami/kafka:2.4.1'
+    restart: always
+    depends_on: ['toxiproxy', 'zookeeper-1', 'zookeeper-2', 'zookeeper-3', 'zookeeper-4', 'zookeeper-5']
+    network_mode: 'service:toxiproxy'
+    environment:
+      KAFKA_CFG_ZOOKEEPER_CONNECT: 'toxiproxy:21803'
+      ALLOW_PLAINTEXT_LISTENER: 'yes'
+      KAFKA_CFG_DEFAULT_REPLICATION_FACTOR: '2'
+      KAFKA_CFG_BROKER_ID: '29093'
+      KAFKA_CFG_BROKER_RACK: '3'
+      KAFKA_CFG_LISTENERS: 'PLAINTEXT://:9093'
+      KAFKA_CFG_ADVERTISED_LISTENERS: 'PLAINTEXT://localhost:29093'
+      KAFKA_CFG_ZOOKEEPER_SESSION_TIMEOUT_MS: '3000'
+      KAFKA_CFG_ZOOKEEPER_CONNECTION_TIMEOUT_MS: '3000'
+      KAFKA_CFG_RESERVED_BROKER_MAX_ID: '100000'
+      KAFKA_CFG_REPLICA_SELECTOR_CLASS: 'org.apache.kafka.common.replica.RackAwareReplicaSelector'
+      KAFKA_CFG_DELETE_TOPIC_ENABLE: 'true'
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: 'false'
+  kafka-4:
+    image: 'bitnami/kafka:2.4.1'
+    restart: always
+    depends_on: ['toxiproxy', 'zookeeper-1', 'zookeeper-2', 'zookeeper-3', 'zookeeper-4', 'zookeeper-5']
+    network_mode: 'service:toxiproxy'
+    environment:
+      KAFKA_CFG_ZOOKEEPER_CONNECT: 'toxiproxy:21804'
+      ALLOW_PLAINTEXT_LISTENER: 'yes'
+      KAFKA_CFG_DEFAULT_REPLICATION_FACTOR: '2'
+      KAFKA_CFG_BROKER_ID: '29094'
+      KAFKA_CFG_BROKER_RACK: '4'
+      KAFKA_CFG_LISTENERS: 'PLAINTEXT://:9094'
+      KAFKA_CFG_ADVERTISED_LISTENERS: 'PLAINTEXT://localhost:29094'
+      KAFKA_CFG_ZOOKEEPER_SESSION_TIMEOUT_MS: '3000'
+      KAFKA_CFG_ZOOKEEPER_CONNECTION_TIMEOUT_MS: '3000'
+      KAFKA_CFG_RESERVED_BROKER_MAX_ID: '100000'
+      KAFKA_CFG_REPLICA_SELECTOR_CLASS: 'org.apache.kafka.common.replica.RackAwareReplicaSelector'
+      KAFKA_CFG_DELETE_TOPIC_ENABLE: 'true'
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: 'false'
+  kafka-5:
+    image: 'bitnami/kafka:2.4.1'
+    restart: always
+    depends_on: ['toxiproxy', 'zookeeper-1', 'zookeeper-2', 'zookeeper-3', 'zookeeper-4', 'zookeeper-5']
+    network_mode: 'service:toxiproxy'
+    environment:
+      KAFKA_CFG_ZOOKEEPER_CONNECT: 'toxiproxy:21805'
+      ALLOW_PLAINTEXT_LISTENER: 'yes'
+      KAFKA_CFG_DEFAULT_REPLICATION_FACTOR: '2'
+      KAFKA_CFG_BROKER_ID: '29095'
+      KAFKA_CFG_BROKER_RACK: '5'
+      KAFKA_CFG_LISTENERS: 'PLAINTEXT://:9095'
+      KAFKA_CFG_ADVERTISED_LISTENERS: 'PLAINTEXT://localhost:29095'
+      KAFKA_CFG_ZOOKEEPER_SESSION_TIMEOUT_MS: '3000'
+      KAFKA_CFG_ZOOKEEPER_CONNECTION_TIMEOUT_MS: '3000'
+      KAFKA_CFG_RESERVED_BROKER_MAX_ID: '100000'
+      KAFKA_CFG_REPLICA_SELECTOR_CLASS: 'org.apache.kafka.common.replica.RackAwareReplicaSelector'
+      KAFKA_CFG_DELETE_TOPIC_ENABLE: 'true'
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: 'false'
+  toxiproxy:
+    image: 'shopify/toxiproxy:2.1.4'
+    restart: always
+    entrypoint: ['/bin/sh', '-c']
+    ports:
+      - '21801:21801'
+      - '21802:21802'
+      - '21803:21803'
+      - '21804:21804'
+      - '21805:21805'
+      - '29091:29091'
+      - '29092:29092'
+      - '29093:29093'
+      - '29094:29094'
+      - '29095:29095'
+      - '8474:8474'
+    command:
+      - |
+        {
+          while ! nc -w 1 localhost 8474 </dev/null; do echo "Waiting"; sleep 1; done
+          echo "toxiproxy up"
+
+          /go/bin/toxiproxy-cli create zk1 -l 0.0.0.0:21801 -u zookeeper-1:2181
+          /go/bin/toxiproxy-cli create zk2 -l 0.0.0.0:21802 -u zookeeper-2:2181
+          /go/bin/toxiproxy-cli create zk3 -l 0.0.0.0:21803 -u zookeeper-3:2181
+          /go/bin/toxiproxy-cli create zk4 -l 0.0.0.0:21804 -u zookeeper-4:2181
+          /go/bin/toxiproxy-cli create zk5 -l 0.0.0.0:21805 -u zookeeper-5:2181
+
+          /go/bin/toxiproxy-cli create kafka1 -l 0.0.0.0:29091 -u localhost:9091
+          /go/bin/toxiproxy-cli create kafka2 -l 0.0.0.0:29092 -u localhost:9092
+          /go/bin/toxiproxy-cli create kafka3 -l 0.0.0.0:29093 -u localhost:9093
+          /go/bin/toxiproxy-cli create kafka4 -l 0.0.0.0:29094 -u localhost:9094
+          /go/bin/toxiproxy-cli create kafka5 -l 0.0.0.0:29095 -u localhost:9095
+
+        } &
+        exec /go/bin/toxiproxy -host=0.0.0.0 -port=8474
